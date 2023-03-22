@@ -26,7 +26,7 @@ namespace WellAPI.Controllers
         }
 
         [HttpPost]
-        public JsonResult Create(WellDTO well)
+        public JsonResult Add(WellDTO well)
         {
 
             var w = _mapper.Map<Well>(well);
@@ -40,7 +40,7 @@ namespace WellAPI.Controllers
         }
 
         [HttpPut]
-        public JsonResult Edit(WellDTO well)
+        public JsonResult Update(WellDTO well)
         {
             var WellInDb = _wellRepository.GetById(well.Id);
             if (WellInDb == null)
@@ -52,13 +52,14 @@ namespace WellAPI.Controllers
 
             WellInDb.UpdatedAt = DateTime.UtcNow;
 
+            _wellRepository.Update(WellInDb);
             _wellRepository.Save();
 
             return new JsonResult(Ok(_mapper.Map<WellDTO>(WellInDb)));
         }
 
         [HttpGet("{id}")]
-        public JsonResult Get(long id)
+        public JsonResult GetById(long id)
         {
             var result = _wellRepository.GetById(id);
 
@@ -83,7 +84,7 @@ namespace WellAPI.Controllers
         }
 
         [HttpGet]
-        public JsonResult getAll()
+        public JsonResult GetAll()
         {
             var result = _wellRepository.GetAll();
 
