@@ -6,6 +6,7 @@ using System.Linq;
 using AutoMapper;
 using WellAPI.DTO;
 using System.Collections.Generic;
+using WellAPI.Repository;
 
 namespace WellAPI.Controllers
 {
@@ -15,16 +16,14 @@ namespace WellAPI.Controllers
     {
         private readonly ApiContext _context;
         private readonly IMapper _mapper;
+        private IWellRepository _wellRepository;
 
-        public WellController(ApiContext context, IMapper mapper)
+        public WellController(ApiContext context, IMapper mapper, IWellRepository wellRepository)
         {
             _context = context;
             _mapper = mapper;
+            _wellRepository = wellRepository;
         }
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
 
         [HttpPost]
         public JsonResult Create(WellDTO well)
@@ -34,16 +33,16 @@ namespace WellAPI.Controllers
             w.CreatedAt = DateTime.UtcNow;
             w.UpdatedAt = DateTime.UtcNow;
 
-            _context.Wells.Add(w);
+            _wellRepository.Add(w);
 
-            _context.SaveChanges();
+            _wellRepository.Save();
             return new JsonResult(Ok(w));
         }
 
         [HttpPut]
         public JsonResult Edit(WellDTO well)
         {
-            var WellInDb = _context.Wells.FirstOrDefault(w => w.Id == well.Id);
+            var WellInDb = _wellRepository.GetById(well.Id);
             if (WellInDb == null)
                 return new JsonResult(NotFound());
 
@@ -53,7 +52,7 @@ namespace WellAPI.Controllers
 
             WellInDb.UpdatedAt = DateTime.UtcNow;
 
-            _context.SaveChanges();
+            _wellRepository.Save();
 
             return new JsonResult(Ok(_mapper.Map<WellDTO>(WellInDb)));
         }
@@ -61,7 +60,7 @@ namespace WellAPI.Controllers
         [HttpGet("{id}")]
         public JsonResult Get(long id)
         {
-            var result = _context.Wells.Find(id);
+            var result = _wellRepository.GetById(id);
 
             if (result == null)
                 return new JsonResult(NotFound());
@@ -72,13 +71,13 @@ namespace WellAPI.Controllers
         [HttpDelete("{id}")]
         public JsonResult Delete(long id)
         {
-            var result = _context.Wells.Find(id);
+            var result = _wellRepository.GetById(id);
 
             if (result == null)
                 return new JsonResult(NotFound());
 
-            _context.Wells.Remove(result);
-            _context.SaveChanges();
+            _wellRepository.Delete(id);
+            _wellRepository.Save();
 
             return new JsonResult(NoContent());
         }
@@ -86,7 +85,7 @@ namespace WellAPI.Controllers
         [HttpGet]
         public JsonResult getAll()
         {
-            var result = _context.Wells.ToList();
+            var result = _wellRepository.GetAll();
 
             return new JsonResult(Ok(_mapper.Map<IEnumerable<WellDTO>>(result)));
         }

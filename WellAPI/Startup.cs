@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using WellAPI.AutoMapperProfile;
 using WellAPI.Data;
 using AutoMapper;
+using WellAPI.Repository;
 
 namespace WellAPI
 {
@@ -44,6 +45,7 @@ namespace WellAPI
             });
             var mapper = config.CreateMapper();
             services.AddSingleton(mapper);
+            services.AddScoped<IWellRepository, WellRepository>();
         }
 
 
